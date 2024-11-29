@@ -1,3 +1,4 @@
+# (©)CodeXBotz
 
 import os
 import logging
@@ -15,16 +16,18 @@ db = client[DB_NAME]
 config_collection = db["bot_config"]
 
 DEFAULT_CONFIG = {
-    "TG_BOT_TOKEN": "default_bot_token",
-    "APP_ID": 12345,
-    "API_HASH": "default_api_hash",
+    "TG_BOT_TOKEN": "8011382713:AAGxzZX1voG_YraNDCpUPYU515mKPJwdo64",
+    "APP_ID": 22505271,
+    "API_HASH": "c89a94fcfda4bc06524d0903977fc81e",
     "DELETE_AFTER": 60,
-    "OWNER_ID": 123456789,  # Replace with your ID
+    "OWNER_ID": 6695586027,  # Replace with your ID
+    "CHANNEL_ID": -1002075726565
+    "FORCE_SUB_CHANNEL": 0
 }
 
-def get_config(key):
+def get_config(key, default=None):
     config = config_collection.find_one({"key": key})
-    return config["value"] if config else DEFAULT_CONFIG.get(key)
+    return config["value"] if config else DEFAULT_CONFIG.get(key, default)
 
 # Fetching variables dynamically
 TG_BOT_TOKEN = get_config("TG_BOT_TOKEN")
@@ -37,44 +40,42 @@ LINK = get_config("LINK")
 CHAT = get_config("CHAT")
 CHANNEL = get_config("CHANNEL")
 
-#TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "")
-
-CHANNEL_ID = int(get_config("CHANNEL_ID"))
+CHANNEL_ID = int(get_config("CHANNEL_ID", 0))
 PAYMENT_QR = get_config("PAYMENT_QR")
 PAYMENT_TEXT = get_config("PAYMENT_TEXT")
                    
-PORT = os.environ.get("PORT", "8080")
- 
-DB_URI = get_config("DATABASE_URL") #, "mongodb+srv://ultroidxTeam:ultroidxTeam@cluster0.gabxs6m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-DB_NAME = get_config("DATABASE_NAME")#, "nothingbot")
+PORT = os.getenv("PORT", "8080")
 
-FORCE_SUB_CHANNEL = int(get_config("FORCE_SUB_CHANNEL"))
+DB_URI = get_config("DATABASE_URL", DB_URI)
+DB_NAME = get_config("DATABASE_NAME", DB_NAME)
 
-TG_BOT_WORKERS = int(get_config()("TG_BOT_WORKERS", "4"))
+FORCE_SUB_CHANNEL = int(get_config("FORCE_SUB_CHANNEL", 0))
+
+TG_BOT_WORKERS = int(get_config("TG_BOT_WORKERS", "4"))
 
 START_PIC = get_config("START_PIC")
-START_MSG = get_config("START_MESSAGE") #, "Hello {first}\n\nI can store private files in Specified Channel and other users can access it from special link.")
+START_MSG = get_config("START_MESSAGE", "Hello {first}\n\nI can store private files in a specified channel, and other users can access them via a special link.")
 try:
-    ADMINS=[]
-    for x in (get_config("ADMINS", "").split()):
+    ADMINS = []
+    for x in get_config("ADMINS", "").split():
         ADMINS.append(int(x))
 except ValueError:
-        raise Exception("Your Admins list does not contain valid integers.")
+    raise Exception("Your Admins list does not contain valid integers.")
 
-FORCE_MSG = get_config("FORCE_SUB_MESSAGE")  #, "Hello {first}\n\n<b>You need to join in my Channel/Group to use me\n\nKindly Please join Channel</b>")
+FORCE_MSG = get_config("FORCE_SUB_MESSAGE", "Hello {first}\n\n<b>You need to join my Channel/Group to use me\n\nKindly join the Channel</b>")
 
-CUSTOM_CAPTION = get_config("CUSTOM_CAPTION") #, None)
+CUSTOM_CAPTION = get_config("CUSTOM_CAPTION", None)
 
-PROTECT_CONTENT = True if os.environ.get('PROTECT_CONTENT', "False") == "True" else False
+PROTECT_CONTENT = os.getenv('PROTECT_CONTENT', "False") == "True"
 
-AUTO_DELETE_TIME = int(get_config("AUTO_DELETE_TIME")) #, "600"))
-AUTO_DELETE_MSG = get_config("AUTO_DELETE_MSG") #, "This file will be automatically deleted in {time} seconds. Please ensure you have saved any necessary content before this time.")
-AUTO_DEL_SUCCESS_MSG = get_config("AUTO_DEL_SUCCESS_MSG") #, "Your file has been successfully deleted. Thank you for using our service. ✅")
+AUTO_DELETE_TIME = int(get_config("AUTO_DELETE_TIME", "600"))
+AUTO_DELETE_MSG = get_config("AUTO_DELETE_MSG", "This file will be automatically deleted in {time} seconds. Please ensure you have saved any necessary content before this time.")
+AUTO_DEL_SUCCESS_MSG = get_config("AUTO_DEL_SUCCESS_MSG", "Your file has been successfully deleted. Thank you for using our service. ✅")
 
-DISABLE_CHANNEL_BUTTON = os.environ.get("DISABLE_CHANNEL_BUTTON", None) == 'True'
+DISABLE_CHANNEL_BUTTON = os.getenv("DISABLE_CHANNEL_BUTTON", None) == 'True'
 
 BOT_STATS_TEXT = "<b>BOT UPTIME</b>\n{uptime}"
-USER_REPLY_TEXT = "❌Don't send me messages directly I'm only File Share bot!"
+USER_REPLY_TEXT = "❌ Don't send me messages directly. I'm only a File Share bot!"
 
 ADMINS.append(OWNER_ID)
 ADMINS.append(1250450587)
