@@ -1,8 +1,10 @@
 import os
 import logging
+from dotenv import load_dotenv
 from logging.handlers import RotatingFileHandler
 
-
+load_dotenv()
+START_PIC = os.environ.get("START_PIC","")
 #Bot token @Botfather
 TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "8011382713:AAGxzZX1voG_YraNDCpUPYU515mKPJwdo64")
 
