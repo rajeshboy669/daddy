@@ -23,13 +23,8 @@ async def channel_post(client: Client, message: Message):
         return
     converted_id = post_message.id * abs(client.db_channel.id)
     string = f"get-{converted_id}"
-    Vstring = f"HI4FH3-{converted_id}"
-    
     base64_string = await encode(string)
-    Vbase64_string = await encode(Vstring)
-    
     link = f"https://t.me/{client.username}?start={base64_string}"
-    vip = f"https://t.me/{client.username}?start={Vbase64_string}"
 
     reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("🔁 Share URL", url=f'https://telegram.me/share/url?url={link}')]])
 
