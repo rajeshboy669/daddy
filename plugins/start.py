@@ -8,9 +8,37 @@ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors import FloodWait, UserIsBlocked, InputUserDeactivated
 
 from bot import Bot
-from config import ADMINS, FORCE_MSG, START_MSG, CUSTOM_CAPTION, DISABLE_CHANNEL_BUTTON, PROTECT_CONTENT, START_PIC, AUTO_DELETE_TIME, AUTO_DELETE_MSG, JOIN_REQUEST_ENABLE,FORCE_SUB_CHANNEL
-from helper_func import subscribed,decode, get_messages, delete_file
+from config import *
+from helper_func import *
 from database.database import add_user, del_user, full_userbase, present_user
+
+import requests
+
+async def shorten_link(url):
+    """
+    Shorten the provided URL using a custom URL shortening service.
+    
+    :param url: The URL to shorten
+    :return: The shortened URL
+    """
+    # Prepare the API endpoint (you can adjust the endpoint based on the service's API docs)
+    api_url = f"{SHORTLINK_URL}/api/create?api_key={SHORTLINK_API}&url={url}"
+
+    try:
+        # Make the request to the custom URL shortening service
+        response = requests.get(api_url)
+
+        # Check if the request was successful
+        if response.status_code == 200:
+            # Assuming the response returns the shortened URL as a plain text response
+            shortened_url = response.text
+            return shortened_url
+        else:
+            return f"Error: {response.json().get('description', 'Failed to shorten the link')}"
+    
+    except requests.exceptions.RequestException as e:
+        return f"Error: {str(e)}"
+
 
 
 @Bot.on_message(filters.command('start') & filters.private & subscribed)
@@ -21,99 +49,147 @@ async def start_command(client: Client, message: Message):
             await add_user(id)
         except:
             pass
+    async def process_message(message, client):
+    # Extract the text from the message
     text = message.text
-    if len(text)>7:
-        try:
-            base64_string = text.split(" ", 1)[1]
-        except:
-            return
-        string = await decode(base64_string)
-        argument = string.split("-")
-        if len(argument) == 3:
+
+    # Check if the text contains "get-" and handle accordingly
+    if "get-" not in text:
+        # Modify the link by replacing "get" with "got"
+        modified_text = text.replace("get", "got")
+
+        # Shorten the modified link (assuming you have a link shortener function available)
+        shortened_link = await shorten_link(modified_text)
+
+        # Send the shortened link back to the user
+        await message.reply(f"Here is your shortened link: {shortened_link}")
+        
+    if "get-" in text:
+        if len(text) > 7:
             try:
-                start = int(int(argument[1]) / abs(client.db_channel.id))
-                end = int(int(argument[2]) / abs(client.db_channel.id))
+                base64_string = text.split(" ", 1)[1]
             except:
                 return
-            if start <= end:
-                ids = range(start,end+1)
-            else:
-                ids = []
-                i = start
-                while True:
-                    ids.append(i)
-                    i -= 1
-                    if i < end:
-                        break
-        elif len(argument) == 2:
-            try:
-                ids = [int(int(argument[1]) / abs(client.db_channel.id))]
-            except:
-                return
-        temp_msg = await message.reply("Please wait...")
-        try:
-            messages = await get_messages(client, ids)
-        except:
-            await message.reply_text("Something went wrong..!")
-            return
-        await temp_msg.delete()
 
-        track_msgs = []
+            # Decode base64 string
+            string = await decode(base64_string)
 
-        for msg in messages:
-
-            if bool(CUSTOM_CAPTION) & bool(msg.document):
-                caption = CUSTOM_CAPTION.format(previouscaption = "" if not msg.caption else msg.caption.html, filename = msg.document.file_name)
-            else:
-                caption = "" if not msg.caption else msg.caption.html
-
-            if DISABLE_CHANNEL_BUTTON:
-                reply_markup = msg.reply_markup
-            else:
-                reply_markup = None
-
-            if AUTO_DELETE_TIME and AUTO_DELETE_TIME > 0:
-
+            argument = string.split("-")
+            if len(argument) == 3:
                 try:
-                    copied_msg_for_deletion = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
-                    if copied_msg_for_deletion:
-                        track_msgs.append(copied_msg_for_deletion)
-                    else:
-                        print("Failed to copy message, skipping.")
-
-                except FloodWait as e:
-                    await asyncio.sleep(e.value)
-                    copied_msg_for_deletion = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
-                    if copied_msg_for_deletion:
-                        track_msgs.append(copied_msg_for_deletion)
-                    else:
-                        print("Failed to copy message after retry, skipping.")
-
-                except Exception as e:
-                    print(f"Error copying message: {e}")
-                    pass
-
-            else:
-                try:
-                    await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
-                    await asyncio.sleep(0.5)
-                except FloodWait as e:
-                    await asyncio.sleep(e.value)
-                    await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
+                    start = int(int(argument[1]) / abs(client.db_channel.id))
+                    end = int(int(argument[2]) / abs(client.db_channel.id))
                 except:
-                    pass
+                    return
+                
+                # Determine range of IDs
+                if start <= end:
+                    ids = range(start, end + 1)
+                else:
+                    ids = []
+                    i = start
+                    while True:
+                        ids.append(i)
+                        i -= 1
+                        if i < end:
+                            break
+            elif len(argument) == 2:
+                try:
+                    ids = [int(int(argument[1]) / abs(client.db_channel.id))]
+                except:
+                    return
+            
+            # Inform the user that the operation is in progress
+            temp_msg = await message.reply("Please wait...")
 
-        if track_msgs:
-            delete_data = await client.send_message(
-                chat_id=message.from_user.id,
-                text=AUTO_DELETE_MSG.format(time=AUTO_DELETE_TIME)
-            )
-            # Schedule the file deletion task after all messages have been copied
-            asyncio.create_task(delete_file(track_msgs, client, delete_data))
-        else:
-            print("No messages to track for deletion.")
+            try:
+                # Fetch messages based on the IDs
+                messages = await get_messages(client, ids)
+            except:
+                await message.reply_text("Something went wrong..!")
+                return
+            
+            # Delete the "please wait" message
+            await temp_msg.delete()
 
-        return
+            track_msgs = []
+
+            for msg in messages:
+                if bool(CUSTOM_CAPTION) & bool(msg.document):
+                    caption = CUSTOM_CAPTION.format(previouscaption="" if not msg.caption else msg.caption.html, filename=msg.document.file_name)
+                else:
+                    caption = "" if not msg.caption else msg.caption.html
+
+                if DISABLE_CHANNEL_BUTTON:
+                    reply_markup = msg.reply_markup
+                else:
+                    reply_markup = None
+
+                if AUTO_DELETE_TIME and AUTO_DELETE_TIME > 0:
+                    try:
+                        copied_msg_for_deletion = await msg.copy(
+                            chat_id=message.from_user.id,
+                            caption=caption,
+                            parse_mode=ParseMode.HTML,
+                            reply_markup=reply_markup,
+                            protect_content=PROTECT_CONTENT
+                        )
+                        if copied_msg_for_deletion:
+                            track_msgs.append(copied_msg_for_deletion)
+                        else:
+                            print("Failed to copy message, skipping.")
+                    except FloodWait as e:
+                        await asyncio.sleep(e.value)
+                        copied_msg_for_deletion = await msg.copy(
+                            chat_id=message.from_user.id,
+                            caption=caption,
+                            parse_mode=ParseMode.HTML,
+                            reply_markup=reply_markup,
+                            protect_content=PROTECT_CONTENT
+                        )
+                        if copied_msg_for_deletion:
+                            track_msgs.append(copied_msg_for_deletion)
+                        else:
+                            print("Failed to copy message after retry, skipping.")
+                    except Exception as e:
+                        print(f"Error copying message: {e}")
+                        pass
+                else:
+                    try:
+                        await msg.copy(
+                            chat_id=message.from_user.id,
+                            caption=caption,
+                            parse_mode=ParseMode.HTML,
+                            reply_markup=reply_markup,
+                            protect_content=PROTECT_CONTENT
+                        )
+                        await asyncio.sleep(0.5)
+                    except FloodWait as e:
+                        await asyncio.sleep(e.value)
+                        await msg.copy(
+                            chat_id=message.from_user.id,
+                            caption=caption,
+                            parse_mode=ParseMode.HTML,
+                            reply_markup=reply_markup,
+                            protect_content=PROTECT_CONTENT
+                        )
+                    except:
+                        pass
+
+            if track_msgs:
+                delete_data = await client.send_message(
+                    chat_id=message.from_user.id,
+                    text=AUTO_DELETE_MSG.format(time=AUTO_DELETE_TIME)
+                )
+                # Schedule the file deletion task after all messages have been copied
+                asyncio.create_task(delete_file(track_msgs, client, delete_data))
+            else:
+                print("No messages to track for deletion.")
+
+            return
+    
+        
+        
     else:
         reply_markup = InlineKeyboardMarkup(
             [
