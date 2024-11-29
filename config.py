@@ -41,7 +41,9 @@ CHANNEL = get_config("CHANNEL")
 #TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "")
 
 CHANNEL_ID = int(get_config("CHANNEL_ID")
-
+PAYMENT_QR = get_config("PAYMENT_QR")
+PAYMENT_TEXT = get_config("PAYMENT_TEXT")
+                   
 PORT = os.environ.get("PORT", "8080")
  
 DB_URI = get_config("DATABASE_URL") #, "mongodb+srv://ultroidxTeam:ultroidxTeam@cluster0.gabxs6m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
