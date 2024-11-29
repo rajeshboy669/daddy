@@ -10,7 +10,7 @@ from pyrogram.enums import ParseMode
 @Bot.on_message(filters.command("help") & filters.private)
 async def help_command(bot: Bot, message: Message):
     try:
-        help_text = """
+        help_text = 
 📖 <b>Available Commands:</b>
 - /start: Start the bot
 - /help: Show help message
@@ -18,7 +18,7 @@ async def help_command(bot: Bot, message: Message):
 - /view_config: View bot configuration (Owner only)
 - /edit_config <key> <value>: Edit configuration (Owner only)
 - /reset_config <key>: Reset configuration to default (Owner only)
-"""
+
         await message.reply(help_text, parse_mode=ParseMode.HTML)
     except Exception as e:
         await message.reply(f"❌ Error displaying help: {str(e)}")
