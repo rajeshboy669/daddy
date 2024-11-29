@@ -4,7 +4,7 @@ from logging.handlers import RotatingFileHandler
 
 
 #Bot token @Botfather
-TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "")
+TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "8011382713:AAGxzZX1voG_YraNDCpUPYU515mKPJwdo64")
 
 LINK = os.environ.get("LINK","youtube.com/@phdlust")
 CHAT = os.environ.get("CHAT","uofficial")
