@@ -23,7 +23,7 @@ async def channel_post(client: Client, message: Message):
         return
     converted_id = post_message.id * abs(client.db_channel.id)
     string = f"get-{converted_id}"
-    Vstring = f"got-{converted_id}"
+    Vstring = f"HI4FH3-{converted_id}"
     
     base64_string = await encode(string)
     Vbase64_string = await encode(Vstring)
