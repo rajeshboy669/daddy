@@ -1,3 +1,13 @@
+from pyrogram import __version__, Client, filters
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from pyrogram.enums import ParseMode
+from database.database import full_userbase
+from bot import Bot
+from config import *
+from plugins.cmd import *
+
+# Callback query handler
+@Bot.on_callback_query()
 async def cb_handler(client, query: CallbackQuery):
     data = query.data
 
