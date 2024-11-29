@@ -6,9 +6,14 @@ from logging.handlers import RotatingFileHandler
 #Bot token @Botfather
 TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "")
 
-LINK = os.environ.get("LINK","")
-CHAT = os.environ.get("CHAT","")
-CHANNEL = os.environ.get("CHANNEL","")
+LINK = os.environ.get("LINK","youtube.com/@phdlust")
+CHAT = os.environ.get("CHAT","uofficial")
+CHANNEL = os.environ.get("CHANNEL","ultroidxteam")
+
+
+# Your shortener settings (environment variables)
+SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "https://inshorturl.com")
+SHORTLINK_API = os.environ.get("SHORTLINK_API", "9f943360c339cec4fed66d9d5cbaa0c2b3d41f81")
 
 #Your API ID & API HASH from my.telegram.org [https://youtu.be/gZQJ-yTMkEo?si=H4NlUUgjsIc5btzH]
 #Your API ID from my.telegram.org
