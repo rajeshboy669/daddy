@@ -16,7 +16,7 @@ db = client[DB_NAME]
 config_collection = db["bot_config"]
 
 DEFAULT_CONFIG = {
-    "TG_BOT_TOKEN": "8011382713:AAGxzZX1voG_YraNDCpUPYU515mKPJwdo64",
+    "TG_BOT_TOKEN": "801X1voG_YraNDCpUPYU515mKPJwdo64",
     "APP_ID": 22505271,
     "API_HASH": "c89a94fcfda4bc06524d0903977fc81e",
     "DELETE_AFTER": 60,
