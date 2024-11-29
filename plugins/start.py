@@ -8,10 +8,9 @@ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors import FloodWait, UserIsBlocked, InputUserDeactivated
 
 from bot import Bot
-from config import ADMINS, FORCE_MSG, START_MSG, CUSTOM_CAPTION, DISABLE_CHANNEL_BUTTON, PROTECT_CONTENT, START_PIC, AUTO_DELETE_TIME, AUTO_DELETE_MSG
+from config import ADMINS, FORCE_MSG, START_MSG, CUSTOM_CAPTION, SHORTLINK_URL, SHORTLINK_API, DISABLE_CHANNEL_BUTTON, PROTECT_CONTENT, START_PIC, AUTO_DELETE_TIME, AUTO_DELETE_MSG
 from helper_func import subscribed,decode, get_messages, delete_file
 from database.database import add_user, del_user, full_userbase, present_user
-
 
 async def create_vip_link(client: Client, base64_string: str):
     # Create the link based on whether it needs the "HI4FH3" prefix or not
@@ -22,16 +21,17 @@ async def create_vip_link(client: Client, base64_string: str):
 
     return short_vip_link
 
-# Helper function to shorten the link using the URL shortener API
+# Helper function to shorten the link using the URL shortener API (asynchronously)
 async def shorten_link(link: str):
     try:
-        # Construct the API request
-        api_url = f"{SHORTLINK_URL}/api?apikey={SHORTLINK_API}&url={link}"
-        response = requests.get(api_url)
-        data = response.json()
-        
-        if response.status_code == 200 and "result" in data:
-            # Return the shortened link
+        # Construct the API request using aiohttp for non-blocking HTTP request
+        async with aiohttp.ClientSession() as session:
+            api_url = f"{SHORTLINK_URL}/api?apikey={SHORTLINK_API}&url={link}"
+            async with session.get(api_url) as response:
+                data = await response.json()
+
+        # Check for valid response and return shortened link
+        if response.status == 200 and "result" in data:
             return data["result"]
         else:
             # If there's an issue, return the original link
@@ -39,7 +39,7 @@ async def shorten_link(link: str):
     except Exception as e:
         print(f"Error shortening link: {e}")
         return link  # In case of error, return the original link
-        
+
 @Bot.on_message(filters.command('start') & filters.private & subscribed)
 async def start_command(client: Client, message: Message):
     id = message.from_user.id
@@ -49,19 +49,22 @@ async def start_command(client: Client, message: Message):
         except:
             pass
     text = message.text
-    if len(text)>7:
+    if len(text) > 7:
         try:
             base64_string = text.split(" ", 1)[1]
         except:
             return
+        
         string = await decode(base64_string)
 
+        # If "HI4FH3" is not in the base64 string, create and send a VIP link
         if "HI4FH3" not in base64_string:
             vip_link = await create_vip_link(client, base64_string)
             # Send the VIP link to the user
-            reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("🔁 Share URL", url=vip_link')]])
+            reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("🔁 Share URL", url=vip_link)]])
             await message.reply(f"<b>Your VIP Link:</b>\n\n{vip_link}", reply_markup=reply_markup, disable_web_page_preview=True)
         
+        # Continue with the rest of the functionality (getting and processing messages)
         argument = string.split("-")
         if len(argument) == 3:
             try:
@@ -70,7 +73,7 @@ async def start_command(client: Client, message: Message):
             except:
                 return
             if start <= end:
-                ids = range(start,end+1)
+                ids = range(start, end + 1)
             else:
                 ids = []
                 i = start
@@ -84,6 +87,7 @@ async def start_command(client: Client, message: Message):
                 ids = [int(int(argument[1]) / abs(client.db_channel.id))]
             except:
                 return
+        
         temp_msg = await message.reply("Please wait...")
         try:
             messages = await get_messages(client, ids)
@@ -96,8 +100,9 @@ async def start_command(client: Client, message: Message):
 
         for msg in messages:
 
+            caption = ""
             if bool(CUSTOM_CAPTION) & bool(msg.document):
-                caption = CUSTOM_CAPTION.format(previouscaption = "" if not msg.caption else msg.caption.html, filename = msg.document.file_name)
+                caption = CUSTOM_CAPTION.format(previouscaption="" if not msg.caption else msg.caption.html, filename=msg.document.file_name)
             else:
                 caption = "" if not msg.caption else msg.caption.html
 
@@ -107,26 +112,24 @@ async def start_command(client: Client, message: Message):
                 reply_markup = None
 
             if AUTO_DELETE_TIME and AUTO_DELETE_TIME > 0:
-
                 try:
-                    copied_msg_for_deletion = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
+                    copied_msg_for_deletion = await msg.copy(
+                        chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
                     if copied_msg_for_deletion:
                         track_msgs.append(copied_msg_for_deletion)
                     else:
                         print("Failed to copy message, skipping.")
-
                 except FloodWait as e:
                     await asyncio.sleep(e.value)
-                    copied_msg_for_deletion = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
+                    copied_msg_for_deletion = await msg.copy(
+                        chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
                     if copied_msg_for_deletion:
                         track_msgs.append(copied_msg_for_deletion)
                     else:
                         print("Failed to copy message after retry, skipping.")
-
                 except Exception as e:
                     print(f"Error copying message: {e}")
                     pass
-
             else:
                 try:
                     await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
@@ -142,22 +145,22 @@ async def start_command(client: Client, message: Message):
                 chat_id=message.from_user.id,
                 text=AUTO_DELETE_MSG.format(time=AUTO_DELETE_TIME)
             )
-            # Schedule the file deletion task after all messages have been copied
             asyncio.create_task(delete_file(track_msgs, client, delete_data))
         else:
             print("No messages to track for deletion.")
 
         return
     else:
+        # Handle when the message doesn't contain a valid command or length of text
         reply_markup = InlineKeyboardMarkup(
             [
                 [
-                    InlineKeyboardButton("😊 About Me", callback_data = "about"),
-                    InlineKeyboardButton("🔒 Close", callback_data = "close")
+                    InlineKeyboardButton("😊 About Me", callback_data="about"),
+                    InlineKeyboardButton("🔒 Close", callback_data="close")
                 ]
             ]
         )
-        if START_PIC:  # Check if START_PIC has a value
+        if START_PIC:
             await message.reply_photo(
                 photo=START_PIC,
                 caption=START_MSG.format(
@@ -170,7 +173,7 @@ async def start_command(client: Client, message: Message):
                 reply_markup=reply_markup,
                 quote=True
             )
-        else:  # If START_PIC is empty, send only the text
+        else:
             await message.reply_text(
                 text=START_MSG.format(
                     first=message.from_user.first_name,
@@ -184,6 +187,7 @@ async def start_command(client: Client, message: Message):
                 quote=True
             )
         return
+
 
     
 #=====================================================================================##
