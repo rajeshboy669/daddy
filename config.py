@@ -43,7 +43,7 @@ CHANNEL = get_config("CHANNEL")
 CHANNEL_ID = int(get_config("CHANNEL_ID", 0))
 PAYMENT_QR = get_config("PAYMENT_QR")
 PAYMENT_TEXT = get_config("PAYMENT_TEXT")
-                   
+
 PORT = os.getenv("PORT", "8080")
 
 DB_URI = get_config("DATABASE_URL", DB_URI)
@@ -55,6 +55,7 @@ TG_BOT_WORKERS = int(get_config("TG_BOT_WORKERS", "4"))
 
 START_PIC = get_config("START_PIC")
 START_MSG = get_config("START_MESSAGE", "Hello {first}\n\nI can store private files in a specified channel, and other users can access them via a special link.")
+
 try:
     ADMINS = []
     for x in get_config("ADMINS", "").split():
