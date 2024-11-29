@@ -14,30 +14,6 @@ from database.database import add_user, del_user, full_userbase, present_user
 
 import requests
 
-async def shorten_link(url):
-    """
-    Shorten the provided URL using a custom URL shortening service.
-    
-    :param url: The URL to shorten
-    :return: The shortened URL
-    """
-    # Prepare the API endpoint (you can adjust the endpoint based on the service's API docs)
-    api_url = f"{SHORTLINK_URL}/api/create?api_key={SHORTLINK_API}&url={url}"
-
-    try:
-        # Make the request to the custom URL shortening service
-        response = requests.get(api_url)
-
-        # Check if the request was successful
-        if response.status_code == 200:
-            # Assuming the response returns the shortened URL as a plain text response
-            shortened_url = response.text
-            return shortened_url
-        else:
-            return f"Error: {response.json().get('description', 'Failed to shorten the link')}"
-    
-    except requests.exceptions.RequestException as e:
-        return f"Error: {str(e)}"
 
 
 
