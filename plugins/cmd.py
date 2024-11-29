@@ -1,3 +1,5 @@
+
+"""
 from bot import Bot
 from pyrogram import filters
 from config import OWNER_ID, PAYMENT_QR, PAYMENT_TEXT, config_collection, DEFAULT_CONFIG
@@ -84,3 +86,4 @@ async def reset_config(bot: Bot, message: Message):
         await message.reply("Usage: /reset_config <key>")
     except Exception as e:
         await message.reply(f"❌ Error resetting configuration: {str(e)}")
+"""
