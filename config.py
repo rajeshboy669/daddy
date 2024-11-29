@@ -40,7 +40,7 @@ CHANNEL = get_config("CHANNEL")
 
 #TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "")
 
-CHANNEL_ID = int(get_config("CHANNEL_ID")
+CHANNEL_ID = int(get_config("CHANNEL_ID"))
 PAYMENT_QR = get_config("PAYMENT_QR")
 PAYMENT_TEXT = get_config("PAYMENT_TEXT")
                    
@@ -49,7 +49,7 @@ PORT = os.environ.get("PORT", "8080")
 DB_URI = get_config("DATABASE_URL") #, "mongodb+srv://ultroidxTeam:ultroidxTeam@cluster0.gabxs6m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 DB_NAME = get_config("DATABASE_NAME")#, "nothingbot")
 
-FORCE_SUB_CHANNEL = int(get_config("FORCE_SUB_CHANNEL")
+FORCE_SUB_CHANNEL = int(get_config("FORCE_SUB_CHANNEL"))
 
 TG_BOT_WORKERS = int(get_config()("TG_BOT_WORKERS", "4"))
 
@@ -68,7 +68,7 @@ CUSTOM_CAPTION = get_config("CUSTOM_CAPTION") #, None)
 
 PROTECT_CONTENT = True if os.environ.get('PROTECT_CONTENT', "False") == "True" else False
 
-AUTO_DELETE_TIME = int(get_config("AUTO_DELETE_TIME") #, "600"))
+AUTO_DELETE_TIME = int(get_config("AUTO_DELETE_TIME")) #, "600"))
 AUTO_DELETE_MSG = get_config("AUTO_DELETE_MSG") #, "This file will be automatically deleted in {time} seconds. Please ensure you have saved any necessary content before this time.")
 AUTO_DEL_SUCCESS_MSG = get_config("AUTO_DEL_SUCCESS_MSG") #, "Your file has been successfully deleted. Thank you for using our service. ✅")
 
