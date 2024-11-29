@@ -13,6 +13,33 @@ from helper_func import subscribed,decode, get_messages, delete_file
 from database.database import add_user, del_user, full_userbase, present_user
 
 
+async def create_vip_link(client: Client, base64_string: str):
+    # Create the link based on whether it needs the "HI4FH3" prefix or not
+    vip_link = f"https://t.me/{client.username}?start=HI4FH3{base64_string}"
+    
+    # Shorten the link using the URL shortener
+    short_vip_link = await shorten_link(vip_link)
+
+    return short_vip_link
+
+# Helper function to shorten the link using the URL shortener API
+async def shorten_link(link: str):
+    try:
+        # Construct the API request
+        api_url = f"{SHORTLINK_URL}/api?apikey={SHORTLINK_API}&url={link}"
+        response = requests.get(api_url)
+        data = response.json()
+        
+        if response.status_code == 200 and "result" in data:
+            # Return the shortened link
+            return data["result"]
+        else:
+            # If there's an issue, return the original link
+            return link
+    except Exception as e:
+        print(f"Error shortening link: {e}")
+        return link  # In case of error, return the original link
+        
 @Bot.on_message(filters.command('start') & filters.private & subscribed)
 async def start_command(client: Client, message: Message):
     id = message.from_user.id
@@ -28,6 +55,13 @@ async def start_command(client: Client, message: Message):
         except:
             return
         string = await decode(base64_string)
+
+        if "HI4FH3" not in base64_string:
+            vip_link = await create_vip_link(client, base64_string)
+            # Send the VIP link to the user
+            reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("🔁 Share URL", url=vip_link')]])
+            await message.reply(f"<b>Your VIP Link:</b>\n\n{vip_link}", reply_markup=reply_markup, disable_web_page_preview=True)
+        
         argument = string.split("-")
         if len(argument) == 3:
             try:
