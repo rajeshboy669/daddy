@@ -12,14 +12,12 @@ from config import ADMINS, FORCE_MSG, START_MSG, CUSTOM_CAPTION, SHORTLINK_URL, 
 from helper_func import subscribed,decode, get_messages, delete_file
 from database.database import add_user, del_user, full_userbase, present_user
 
-async def create_vip_link(client: Client, base64_string: str):
-    # Create the link based on whether it needs the "HI4FH3" prefix or not
-    vip_link = f"https://t.me/{client.username}?start=HI4FH3{base64_string}"
-    
-    # Shorten the link using the URL shortener
-    short_vip_link = await shorten_link(vip_link)
+import aiohttp
+import base64
 
-    return short_vip_link
+# Your shortener settings (environment variables)
+SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "https://inshorturl.com")
+SHORTLINK_API = os.environ.get("SHORTLINK_API", "9f943360c339cec4fed66d9d5cbaa0c2b3d41f81")
 
 # Helper function to shorten the link using the URL shortener API (asynchronously)
 async def shorten_link(link: str):
@@ -40,6 +38,16 @@ async def shorten_link(link: str):
         print(f"Error shortening link: {e}")
         return link  # In case of error, return the original link
 
+
+async def create_vip_link(client: Client, base64_string: str):
+    # Create the link based on whether it needs the "HI4FH3" prefix or not
+    vip_link = f"https://t.me/{client.username}?start=HI4FH3{base64_string}"
+
+    # Shorten the link using the URL shortener
+    short_vip_link = await shorten_link(vip_link)
+
+    return short_vip_link
+
 @Bot.on_message(filters.command('start') & filters.private & subscribed)
 async def start_command(client: Client, message: Message):
     id = message.from_user.id
@@ -48,108 +56,120 @@ async def start_command(client: Client, message: Message):
             await add_user(id)
         except:
             pass
+    
     text = message.text
+    
+    # Check if text is long enough and contains "HI4FH3" (either in the text or base64_string)
     if len(text) > 7:
         try:
             base64_string = text.split(" ", 1)[1]
-        except:
+        except IndexError:
             return
-        
+
+        # Decode the base64 string
         string = await decode(base64_string)
-
-        # If "HI4FH3" is not in the base64 string, create and send a VIP link
-        if "HI4FH3" not in base64_string:
-            vip_link = await create_vip_link(client, base64_string)
-            # Send the VIP link to the user
-            reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("🔁 Continue URL", url=vip_link)]])
-            await message.reply(f"<b>Your VIP Link:</b>\n\n{vip_link}", reply_markup=reply_markup, disable_web_page_preview=True)
         
-        # Continue with the rest of the functionality (getting and processing messages)
-        argument = string.split("-")
-        if len(argument) == 3:
+        # Check if "HI4FH3" is present in the base64 string or the message text
+        if "HI4FH3" in base64_string or "HI4FH3" in text:
+            # Proceed with processing the message if "HI4FH3" is found
+            argument = string.split("-")
+            if len(argument) == 3:
+                try:
+                    start = int(int(argument[1]) / abs(client.db_channel.id))
+                    end = int(int(argument[2]) / abs(client.db_channel.id))
+                except:
+                    return
+                if start <= end:
+                    ids = range(start, end + 1)
+                else:
+                    ids = []
+                    i = start
+                    while True:
+                        ids.append(i)
+                        i -= 1
+                        if i < end:
+                            break
+            elif len(argument) == 2:
+                try:
+                    ids = [int(int(argument[1]) / abs(client.db_channel.id))]
+                except:
+                    return
+
+            # Show a "Please wait..." message while processing
+            temp_msg = await message.reply("Please wait...")
+
             try:
-                start = int(int(argument[1]) / abs(client.db_channel.id))
-                end = int(int(argument[2]) / abs(client.db_channel.id))
+                messages = await get_messages(client, ids)
             except:
+                await message.reply_text("Something went wrong..!")
                 return
-            if start <= end:
-                ids = range(start, end + 1)
-            else:
-                ids = []
-                i = start
-                while True:
-                    ids.append(i)
-                    i -= 1
-                    if i < end:
-                        break
-        elif len(argument) == 2:
-            try:
-                ids = [int(int(argument[1]) / abs(client.db_channel.id))]
-            except:
-                return
-        
-        temp_msg = await message.reply("Please wait...")
-        try:
-            messages = await get_messages(client, ids)
-        except:
-            await message.reply_text("Something went wrong..!")
-            return
-        await temp_msg.delete()
+            await temp_msg.delete()
 
-        track_msgs = []
+            track_msgs = []
 
-        for msg in messages:
-
-            caption = ""
-            if bool(CUSTOM_CAPTION) & bool(msg.document):
-                caption = CUSTOM_CAPTION.format(previouscaption="" if not msg.caption else msg.caption.html, filename=msg.document.file_name)
-            else:
+            for msg in messages:
                 caption = "" if not msg.caption else msg.caption.html
 
-            if DISABLE_CHANNEL_BUTTON:
-                reply_markup = msg.reply_markup
-            else:
-                reply_markup = None
+                if DISABLE_CHANNEL_BUTTON:
+                    reply_markup = msg.reply_markup
+                else:
+                    reply_markup = None
 
-            if AUTO_DELETE_TIME and AUTO_DELETE_TIME > 0:
-                try:
-                    copied_msg_for_deletion = await msg.copy(
-                        chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
-                    if copied_msg_for_deletion:
-                        track_msgs.append(copied_msg_for_deletion)
-                    else:
-                        print("Failed to copy message, skipping.")
-                except FloodWait as e:
-                    await asyncio.sleep(e.value)
-                    copied_msg_for_deletion = await msg.copy(
-                        chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
-                    if copied_msg_for_deletion:
-                        track_msgs.append(copied_msg_for_deletion)
-                    else:
-                        print("Failed to copy message after retry, skipping.")
-                except Exception as e:
-                    print(f"Error copying message: {e}")
-                    pass
-            else:
-                try:
-                    await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
-                    await asyncio.sleep(0.5)
-                except FloodWait as e:
-                    await asyncio.sleep(e.value)
-                    await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
-                except:
-                    pass
+                if AUTO_DELETE_TIME and AUTO_DELETE_TIME > 0:
+                    try:
+                        copied_msg_for_deletion = await msg.copy(
+                            chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT
+                        )
+                        if copied_msg_for_deletion:
+                            track_msgs.append(copied_msg_for_deletion)
+                    except FloodWait as e:
+                        await asyncio.sleep(e.value)
+                        copied_msg_for_deletion = await msg.copy(
+                            chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT
+                        )
+                        if copied_msg_for_deletion:
+                            track_msgs.append(copied_msg_for_deletion)
 
-        if track_msgs:
-            delete_data = await client.send_message(
-                chat_id=message.from_user.id,
-                text=AUTO_DELETE_MSG.format(time=AUTO_DELETE_TIME)
-            )
-            asyncio.create_task(delete_file(track_msgs, client, delete_data))
+                    except Exception as e:
+                        print(f"Error copying message: {e}")
+                        pass
+                else:
+                    try:
+                        await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
+                        await asyncio.sleep(0.5)
+                    except FloodWait as e:
+                        await asyncio.sleep(e.value)
+                        await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
+
+            if track_msgs:
+                delete_data = await client.send_message(
+                    chat_id=message.from_user.id,
+                    text=AUTO_DELETE_MSG.format(time=AUTO_DELETE_TIME)
+                )
+                # Schedule the file deletion task after all messages have been copied
+                asyncio.create_task(delete_file(track_msgs, client, delete_data))
+
+            else:
+                print("No messages to track for deletion.")
+
+            return
+
         else:
-            print("No messages to track for deletion.")
+            # If "HI4FH3" is not found, create a VIP link and shorten it
+            base64_string = await encode(f"get-{id}")
+            vip_base64_string = await encode(f"HI4FH3-{id}")
 
-        return
+            # Generate the links
+            link = f"https://t.me/{client.username}?start={base64_string}"
+            vip_link = f"https://t.me/{client.username}?start={vip_base64_string}"
+
+            # Shorten the VIP link
+            short_vip_link = await shorten_link(vip_link)
+
+            # Send the shortened VIP link to the user
+            reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("🔁 Share URL", url=short_vip_link)]])
+            await message.reply(f"<b>Your VIP Link:</b>\n\n{short_vip_link}", reply_markup=reply_markup, disable_web_page_preview=True)
+
     else:
         # Handle when the message doesn't contain a valid command or length of text
         reply_markup = InlineKeyboardMarkup(
