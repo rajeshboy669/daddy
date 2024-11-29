@@ -19,6 +19,8 @@ AUTO_DEL_SUCCESS_MSG = os.environ.get("AUTO_DEL_SUCCESS_MSG", "Your file has bee
 #Your API ID from my.telegram.org
 APP_ID = int(os.environ.get("APP_ID", "22505271"))
 
+TG_BOT_WORKERS = int(os.environ.get("TG_BOT_WORKERS", "4"))
+
 #Your API Hash from my.telegram.org
 API_HASH = os.environ.get("API_HASH", "c89a94fcfda4bc06524d0903977fc81e")
 
