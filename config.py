@@ -10,6 +10,10 @@ LINK = os.environ.get("LINK","youtube.com/@phdlust")
 CHAT = os.environ.get("CHAT","uofficial")
 CHANNEL = os.environ.get("CHANNEL","ultroidxteam")
 
+# Auto delete time in seconds.
+AUTO_DELETE_TIME = int(os.getenv("AUTO_DELETE_TIME", "0"))
+AUTO_DELETE_MSG = os.environ.get("AUTO_DELETE_MSG", "This file will be automatically deleted in {time} seconds. Please ensure you have saved any necessary content before this time.")
+AUTO_DEL_SUCCESS_MSG = os.environ.get("AUTO_DEL_SUCCESS_MSG", "Your file has been successfully deleted. Thank you for using our service. ✅")
 
 #Your API ID & API HASH from my.telegram.org [https://youtu.be/gZQJ-yTMkEo?si=H4NlUUgjsIc5btzH]
 #Your API ID from my.telegram.org
