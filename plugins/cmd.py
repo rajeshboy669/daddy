@@ -44,20 +44,29 @@ async def upi_info(bot: Bot, message: Message):
 # Owner-only commands to manage configurations
 @Bot.on_message(filters.command("view_config") & filters.private & filters.user(OWNER_ID))
 async def view_config(bot: Bot, message: Message):
-    configs = config_collection.find()
-    config_text = "<b>Current Configuration:</b>\n\n"
-    for config in configs:
-        config_text += f"<b>{config['key']}:</b> {config['value']}\n"
-    await message.reply(config_text, parse_mode=ParseMode.HTML)
+    try:
+        configs = config_collection.find()
+        config_text = "<b>Current Configuration:</b>\n\n"
+        for config in configs:
+            config_text += f"<b>{config['key']}:</b> {config['value']}\n"
+        await message.reply(config_text, parse_mode=ParseMode.HTML)
+    except Exception as e:
+        await message.reply(f"❌ Error fetching configurations: {str(e)}", parse_mode=ParseMode.HTML)
+
 
 @Bot.on_message(filters.command("edit_config") & filters.private & filters.user(OWNER_ID))
 async def edit_config(bot: Bot, message: Message):
     try:
         _, key, value = message.text.split(maxsplit=2)
+        if key not in DEFAULT_CONFIG:
+            return await message.reply(f"❌ Invalid configuration key: {key}")
         config_collection.update_one({"key": key}, {"$set": {"value": value}}, upsert=True)
         await message.reply(f"✅ Configuration updated: <b>{key}</b> = {value}", parse_mode=ParseMode.HTML)
     except ValueError:
         await message.reply("Usage: /edit_config <key> <value>")
+    except Exception as e:
+        await message.reply(f"❌ Error updating configuration: {str(e)}", parse_mode=ParseMode.HTML)
+
 
 @Bot.on_message(filters.command("reset_config") & filters.private & filters.user(OWNER_ID))
 async def reset_config(bot: Bot, message: Message):
@@ -70,3 +79,5 @@ async def reset_config(bot: Bot, message: Message):
             await message.reply(f"❌ Invalid key: <b>{key}</b>", parse_mode=ParseMode.HTML)
     except ValueError:
         await message.reply("Usage: /reset_config <key>")
+    except Exception as e:
+        await message.reply(f"❌ Error resetting configuration: {str(e)}", parse_mode=ParseMode.HTML)
