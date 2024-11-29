@@ -61,7 +61,7 @@ async def start_command(client: Client, message: Message):
         if "HI4FH3" not in base64_string:
             vip_link = await create_vip_link(client, base64_string)
             # Send the VIP link to the user
-            reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("🔁 Share URL", url=vip_link)]])
+            reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("🔁 Continue URL", url=vip_link)]])
             await message.reply(f"<b>Your VIP Link:</b>\n\n{vip_link}", reply_markup=reply_markup, disable_web_page_preview=True)
         
         # Continue with the rest of the functionality (getting and processing messages)
