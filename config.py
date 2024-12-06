@@ -27,8 +27,8 @@ DB_URI = os.environ.get("DATABASE_URL", "mongodb+srv://jebesa8591:J1emwnTswYPaq8
 DB_NAME = os.environ.get("DATABASE_NAME", "Cluster0")
 
 #auto delete
-DELETE_AFTER = int(os.environ.get("DELETE_AFTER", 60)) #seconds
-NOTIFICATION_TIME = int(os.environ.get('NOTIFICATION_TIME', 60)) #seconds
+DELETE_AFTER = int(os.environ.get("DELETE_AFTER", 1200)) #seconds
+NOTIFICATION_TIME = int(os.environ.get('NOTIFICATION_TIME', 1200)) #seconds
 AUTO_DELETE = os.environ.get("AUTO_DELETE", True) #ON/OFF
 GET_AGAIN = os.environ.get("GET_AGAIN", False) #ON/OFF
 DELETE_INFORM = os.environ.get("INFORM" , "Successfully DELETED !!")
