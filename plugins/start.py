@@ -83,13 +83,14 @@ async def delete_notification_after_delay(client, chat_id, message_id, delay):
 @Bot.on_message(filters.command('start') & filters.private & subscribed)
 async def start_command(client: Client, message: Message):
     id = message.from_user.id
-    owner_id = ADMINS  # Fetch the owner's ID from config
+    UBAN = BAN  # Fetch the owner's ID from config
+    
+    # Schedule the initial message for deletion after 10 minutes
+    #await schedule_auto_delete(client, message.chat.id, message.id, delay=600)
 
     # Check if the user is the owner
-    if id == owner_id:
-        # Owner-specific actions
-        # You can add any additional actions specific to the owner here
-        await message.reply("You are the owner! Additional actions can be added here.")
+    if id == UBAN:
+        sent_message = await message.reply("You are the U-BAN! Additional actions can be added here.")
 
     else:
         if not await present_user(id):
