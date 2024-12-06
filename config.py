@@ -26,10 +26,16 @@ PORT = os.environ.get("PORT", "8585")
 DB_URI = os.environ.get("DATABASE_URL", "mongodb+srv://ultroidxTeam:ultroidxTeam@cluster0.gabxs6m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 DB_NAME = os.environ.get("DATABASE_NAME", "Cluster0")
 
-#Shortner (token system) 
-# check my discription to help by using my refer link of shareus.io
-# 
+#auto delete
+DELETE_AFTER = int(os.environ.get("DELETE_AFTER", 60)) #seconds
+NOTIFICATION_TIME = int(os.environ.get('NOTIFICATION_TIME', 60)) #seconds
+AUTO_DELETE = os.environ.get("AUTO_DELETE", True) #ON/OFF
+GET_AGAIN = os.environ.get("GET_AGAIN", False) #ON/OFF
+DELETE_INFORM = os.environ.get("INFORM" , "Successfully DELETED !!")
+NOTIFICATION = os.environ.get("NOTIFICATION" ,"File will delete after {DELETE_AFTER} seconds.")
+GET_INFORM = os.environ.get("GET_INFORM" ,"File was deleted after {DELETE_AFTER} seconds. Use the button below to GET FILE AGAIN.")
 
+#Shortner (token system) 
 SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "inshorturl.com")
 SHORTLINK_API = os.environ.get("SHORTLINK_API", "9f943360c339cec4fed66d9d5cbaa0c2b3d41f81")
 VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 86400)) # Add time in seconds
