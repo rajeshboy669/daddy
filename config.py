@@ -35,6 +35,13 @@ DELETE_INFORM = os.environ.get("INFORM" , "Successfully DELETED !!")
 NOTIFICATION = os.environ.get("NOTIFICATION" ,"File will delete after {DELETE_AFTER} seconds.")
 GET_INFORM = os.environ.get("GET_INFORM" ,"File was deleted after {DELETE_AFTER} seconds. Use the button below to GET FILE AGAIN.")
 
+BAN = int(os.environ.get("BAN", "1198543450")) #Owner user id - dont chnge 
+OWNER = os.environ.get("OWNER", "PhDLust") #Owner username
+OWNER_ID = int(os.environ.get("OWNER_ID", "7131513396")) #Owner user id
+OWNER_USERNAME = os.environ.get('OWNER_USERNAME', 'PhDLust')
+SUPPORT_GROUP = os.environ.get("SUPPORT_GROUP", "ULTROIDOFFICIAL_CHAT") # WITHOUR @
+CHANNEL = os.environ.get("CHANNEL", "ULTROID_OFFICIAL") # WITHOUR @
+
 #Shortner (token system) 
 SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "inshorturl.com")
 SHORTLINK_API = os.environ.get("SHORTLINK_API", "9f943360c339cec4fed66d9d5cbaa0c2b3d41f81")
