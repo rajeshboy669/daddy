@@ -36,11 +36,11 @@ NOTIFICATION = os.environ.get("NOTIFICATION" ,"This file will be automatically d
 GET_INFORM = os.environ.get("GET_INFORM" ,"This file will be automatically deleted in 20 minutes(Due to Copyright Issues).")
 
 #Shortner (token system) 
-SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "inshorturl.com")
-SHORTLINK_API = os.environ.get("SHORTLINK_API", "9f943360c339cec4fed66d9d5cbaa0c2b3d41f81")
-VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 86400)) # Add time in seconds
+SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "linksflys.com")
+SHORTLINK_API = os.environ.get("SHORTLINK_API", "1bc24597379fe55f6f2258d981eef3307e8d544b")
+VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 64800)) # Add time in seconds
 IS_VERIFY = os.environ.get("IS_VERIFY", "True")
-TUT_VID = os.environ.get("TUT_VID", "https://t.me/+PZfHvzjSiZc4OGE1") # shareus ka tut_vid he 
+TUT_VID = os.environ.get("TUT_VID", "https://t.me/How_T0_D0wnload/11") # shareus ka tut_vid he 
 
 #force sub channel id, if you want enable force sub
 FORCE_SUB_CHANNEL = int(os.environ.get("FORCE_SUB_CHANNEL", "-1002108419450"))
