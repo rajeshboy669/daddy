@@ -31,8 +31,8 @@ DELETE_AFTER = int(os.environ.get("DELETE_AFTER", 1200)) #seconds
 NOTIFICATION_TIME = int(os.environ.get('NOTIFICATION_TIME', 1200)) #seconds
 AUTO_DELETE = os.environ.get("AUTO_DELETE", True) #ON/OFF
 GET_AGAIN = os.environ.get("GET_AGAIN", False) #ON/OFF
-DELETE_INFORM = os.environ.get("INFORM" , "Successfully DELETED !!")
-NOTIFICATION = os.environ.get("NOTIFICATION" ,"File will delete after {DELETE_AFTER} seconds.")
+DELETE_INFORM = os.environ.get("INFORM" , "Your file has been successfully deleted✅")
+NOTIFICATION = os.environ.get("NOTIFICATION" ,"This file will be automatically deleted in 20 minutes(Due to Copyright Issues).")
 GET_INFORM = os.environ.get("GET_INFORM" ,"File was deleted after {DELETE_AFTER} seconds. Use the button below to GET FILE AGAIN.")
 
 #Shortner (token system) 
